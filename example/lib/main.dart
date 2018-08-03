@@ -14,26 +14,33 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _appVersionName = 'Unknown';
   int _deviceVersionCode = -1;
+  int _appVersionCode = -1;
+  String _imei = 'Unknown';
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
   }
-  
+
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     String appVersionName;
     int deviceVersionCode;
-
+    int appVersionCode;
+    String imei;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       appVersionName = await Deviceinfo.appVersionName;
       deviceVersionCode = await Deviceinfo.deviceVersionCode;
+      appVersionCode = await Deviceinfo.appVersionCode;
+      imei = await Deviceinfo.imei;
     } on PlatformException {
       appVersionName = 'Failed to get app version name.';
       deviceVersionCode = -2;
+      appVersionCode = -2;
+      imei = 'Failed to get app imei';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -44,6 +51,8 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _appVersionName = appVersionName;
       _deviceVersionCode = deviceVersionCode;
+      _appVersionCode = appVersionCode;
+      _imei = imei;
     });
   }
 
@@ -62,6 +71,12 @@ class _MyAppState extends State<MyApp> {
               ),
               Expanded(
                 child: Text('deviceVersionCode: $_deviceVersionCode'),
+              ),
+              Expanded(
+                child: Text('appVersionCode: $_appVersionCode'),
+              ),
+              Expanded(
+                child: Text('app imei: $_imei'),
               )
             ],
           )

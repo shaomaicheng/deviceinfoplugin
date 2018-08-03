@@ -15,4 +15,14 @@ class Deviceinfo {
     final int deviceVersionCode = await _channel.invokeMethod('getDeviceVersionCode');
     return deviceVersionCode;
   }
+
+  static Future<int> get appVersionCode async {
+    final int appVersionCode = await _channel.invokeMethod('getAppVersionCode');
+    return appVersionCode;
+  }
+
+  static Future<String> get imei async {
+    final String imei = await _channel.invokeMethod('getImei');
+    return imei;
+  }
 }

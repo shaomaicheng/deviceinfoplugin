@@ -1,9 +1,11 @@
 package io.clei.deviceinfo;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 
 import io.flutter.plugin.common.MethodCall;
@@ -21,7 +23,7 @@ public class DeviceinfoPlugin implements MethodCallHandler {
     private static final String APP_VERSION_CODE = "getAppVersionCode";
     private static final String APP_VERSION_NAME = "getAppVersionName";
     private static final String DEVICE_VERSION_CODE = "getDeviceVersionCode";
-    private static final String IMEL = "getImel";
+    private static final String IMEI = "getImei";
 
     private Registrar registrar;
 
@@ -45,7 +47,7 @@ public class DeviceinfoPlugin implements MethodCallHandler {
             result.success(getVersionName());
         } else if (call.method.equals(DEVICE_VERSION_CODE)) {
             result.success(deviceVersion());
-        } else if (call.method.equals(IMEL)) {
+        } else if (call.method.equals(IMEI)) {
             result.success(imei());
         } else {
             result.notImplemented();
@@ -83,6 +85,19 @@ public class DeviceinfoPlugin implements MethodCallHandler {
 
     private String imei() {
         Context context = registrar.context();
+        if (Build.VERSION.SDK_INT >= 23) {
+            int checkPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE);
+            if (checkPermission != PackageManager.PERMISSION_GRANTED) {
+                return "this phone don't have READ_PHONE_STATE permission";
+            } else {
+                return deviceId(context);
+            }
+        } else {
+            return deviceId(context);
+        }
+    }
+
+    private String deviceId(Context context) {
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         return telephonyManager.getDeviceId();
     }
