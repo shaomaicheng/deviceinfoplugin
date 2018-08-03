@@ -1,10 +1,21 @@
 # deviceinfo
 
-A new flutter plugin project.
+一个 `Flutter` 的获取设备信息的 `plugin`
 
 ## Getting Started
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+* 获取 Android app version name
+```dart
+String appVersionName = await _channel.invokeMethod('getAppVersionName');
+```
 
-For help on editing plugin code, view the [documentation](https://flutter.io/platform-plugins/#edit-code).
+* 获取 Android app version code
+```dart
+int appVersionCode = await _channel.invokeMethod('getAppVersionCode');
+```
+
+* 获取Android device version code (Android API level)
+```dart
+int deviceVersionCode = await _channel.invokeMethod('getDeviceVersionCode');
+```
+
