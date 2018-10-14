@@ -16,6 +16,7 @@ class _MyAppState extends State<MyApp> {
   int _deviceVersionCode = -1;
   int _appVersionCode = -1;
   String _imei = 'Unknown';
+  String _deviceId = '';
 
   @override
   void initState() {
@@ -30,17 +31,20 @@ class _MyAppState extends State<MyApp> {
     int deviceVersionCode;
     int appVersionCode;
     String imei;
+    String deviceId;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       appVersionName = await Deviceinfo.appVersionName;
       deviceVersionCode = await Deviceinfo.deviceVersionCode;
       appVersionCode = await Deviceinfo.appVersionCode;
       imei = await Deviceinfo.imei;
+      deviceId = await Deviceinfo.deviceId;
     } on PlatformException {
       appVersionName = 'Failed to get app version name.';
       deviceVersionCode = -2;
       appVersionCode = -2;
       imei = 'Failed to get app imei';
+      deviceId = 'Failed to get app deviceId';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -53,6 +57,7 @@ class _MyAppState extends State<MyApp> {
       _deviceVersionCode = deviceVersionCode;
       _appVersionCode = appVersionCode;
       _imei = imei;
+      _deviceId = deviceId;
     });
   }
 
@@ -77,6 +82,9 @@ class _MyAppState extends State<MyApp> {
               ),
               Expanded(
                 child: Text('app imei: $_imei'),
+              ),
+              Expanded(
+                child: Text('app deviceId: $_deviceId'),
               )
             ],
           )

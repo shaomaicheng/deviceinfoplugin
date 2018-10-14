@@ -2,11 +2,15 @@ package io.clei.deviceinfo;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
+
+import java.util.UUID;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -24,6 +28,10 @@ public class DeviceinfoPlugin implements MethodCallHandler {
     private static final String APP_VERSION_NAME = "getAppVersionName";
     private static final String DEVICE_VERSION_CODE = "getDeviceVersionCode";
     private static final String IMEI = "getImei";
+    private static final String GET_UUID = "getUUID";
+
+    private static final String DEVICE_INFO_SP_KEY = "device_info_sp_key";
+    private static final String UUID_SP_KEY = "device_spkey_uuid";
 
     private Registrar registrar;
 
@@ -49,6 +57,8 @@ public class DeviceinfoPlugin implements MethodCallHandler {
             result.success(deviceVersion());
         } else if (call.method.equals(IMEI)) {
             result.success(imei());
+        } else if (call.method.equals(GET_UUID)) {
+            result.success(deviceId(registrar.context()));
         } else {
             result.notImplemented();
         }
@@ -90,15 +100,29 @@ public class DeviceinfoPlugin implements MethodCallHandler {
             if (checkPermission != PackageManager.PERMISSION_GRANTED) {
                 return "this phone don't have READ_PHONE_STATE permission";
             } else {
-                return deviceId(context);
+                return imei(context);
             }
         } else {
-            return deviceId(context);
+            return imei(context);
         }
     }
 
-    private String deviceId(Context context) {
+    private String imei(Context context) {
         TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         return telephonyManager.getDeviceId();
+
+    }
+
+    private String deviceId(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(DEVICE_INFO_SP_KEY, Context.MODE_PRIVATE);
+        String uuid = sharedPreferences.getString(UUID_SP_KEY, "");
+        if (TextUtils.isEmpty(uuid)) {
+            // 本地不存在，生成一个
+            uuid = UUID.randomUUID().toString();
+            SharedPreferences.Editor editor = context.getSharedPreferences(DEVICE_INFO_SP_KEY, Context.MODE_PRIVATE).edit();
+            editor.putString(UUID_SP_KEY, uuid);
+            editor.apply();
+        }
+        return uuid;
     }
 }

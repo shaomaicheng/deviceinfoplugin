@@ -25,4 +25,9 @@ class Deviceinfo {
     final String imei = await _channel.invokeMethod('getImei');
     return imei;
   }
+  
+  static Future<String> get deviceId async {
+    final String deviceId = await _channel.invokeMethod('getUUID');
+    return deviceId;
+  }
 }
