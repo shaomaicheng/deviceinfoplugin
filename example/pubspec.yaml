@@ -1,6 +1,9 @@
 name: deviceinfo_example
 description: Demonstrates how to use the deviceinfo plugin.
 
+environment:
+  sdk: '^2.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
