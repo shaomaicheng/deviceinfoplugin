@@ -1,5 +1,9 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
 group 'io.clei.deviceinfo'
 version '1.0.0-SNAPSHOT'
+
 
 buildscript {
     repositories {
@@ -36,4 +40,5 @@ android {
 
 dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

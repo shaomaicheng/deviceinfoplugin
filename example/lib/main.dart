@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:deviceinfo/deviceinfo.dart';
+import 'package:deviceinfo/screeninfo.dart';
 
 void main() => runApp(new MyApp());
 
@@ -17,6 +18,7 @@ class _MyAppState extends State<MyApp> {
   int _appVersionCode = -1;
   String _imei = 'Unknown';
   String _deviceId = '';
+  ScreenDisplay _screenDisplay;
 
   @override
   void initState() {
@@ -32,6 +34,7 @@ class _MyAppState extends State<MyApp> {
     int appVersionCode;
     String imei;
     String deviceId;
+    ScreenDisplay screenDisplay;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       appVersionName = await Deviceinfo.appVersionName;
@@ -39,12 +42,14 @@ class _MyAppState extends State<MyApp> {
       appVersionCode = await Deviceinfo.appVersionCode;
       imei = await Deviceinfo.imei;
       deviceId = await Deviceinfo.deviceId;
+      screenDisplay = await Deviceinfo.screenInfo;
     } on PlatformException {
       appVersionName = 'Failed to get app version name.';
       deviceVersionCode = -2;
       appVersionCode = -2;
       imei = 'Failed to get app imei';
       deviceId = 'Failed to get app deviceId';
+      screenDisplay = null;
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -58,6 +63,7 @@ class _MyAppState extends State<MyApp> {
       _appVersionCode = appVersionCode;
       _imei = imei;
       _deviceId = deviceId;
+      _screenDisplay = screenDisplay;
     });
   }
 
@@ -85,6 +91,9 @@ class _MyAppState extends State<MyApp> {
               ),
               Expanded(
                 child: Text('app deviceId: $_deviceId'),
+              ),
+              Expanded(
+                child: Text('device screen display, width: ${_screenDisplay.width};  height: ${_screenDisplay.height}'),
               )
             ],
           )

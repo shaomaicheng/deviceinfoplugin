@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'screeninfo.dart';
+import 'dart:convert';
 
 class Deviceinfo {
   static const MethodChannel _channel =
@@ -30,4 +32,10 @@ class Deviceinfo {
     final String deviceId = await _channel.invokeMethod('getUUID');
     return deviceId;
   }
+
+  static Future<ScreenDisplay> get screenInfo async {
+    final String screenDisplay = await _channel.invokeMethod("getdevicescreen");
+    return ScreenDisplay.fromJson(json.decode(screenDisplay));
+  }
+
 }
