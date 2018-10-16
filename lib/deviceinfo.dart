@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'buildinfo.dart';
 import 'screeninfo.dart';
 import 'dart:convert';
 
@@ -36,6 +37,11 @@ class Deviceinfo {
   static Future<ScreenDisplay> get screenInfo async {
     final String screenDisplay = await _channel.invokeMethod("getdevicescreen");
     return ScreenDisplay.fromJson(json.decode(screenDisplay));
+  }
+
+  static Future<Build> get buildInfo async {
+    final String buildInfo = await _channel.invokeMethod('get_build');
+    return Build.fromJson(json.decode(buildInfo));
   }
 
 }

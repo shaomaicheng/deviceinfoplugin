@@ -7,6 +7,7 @@ import android.os.Build
 import android.support.v4.content.ContextCompat
 import android.telephony.TelephonyManager
 import android.text.TextUtils
+import com.google.gson.Gson
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -24,6 +25,7 @@ private val GET_DEVICE_SCREEN = "getdevicescreen"
 
 private val DEVICE_INFO_SP_KEY = "device_info_sp_key"
 private val UUID_SP_KEY = "device_spkey_uuid"
+private val GET_BUILD = "get_build"
 
 /**
  * DeviceinfoPlugin
@@ -73,6 +75,8 @@ class DeviceinfoPlugin(private val registrar: Registrar) : MethodCallHandler {
             call.method == GET_UUID -> result.success(deviceId(registrar.context()))
             // 屏幕宽高
             call.method == GET_DEVICE_SCREEN -> result.success(getDeviceScreen())
+            // 获取build信息
+            call.method == GET_BUILD -> result.success(getBuild())
             else -> result.notImplemented()
         }
     }
@@ -140,6 +144,26 @@ class DeviceinfoPlugin(private val registrar: Registrar) : MethodCallHandler {
         return uuid
     }
 
+    private fun getBuild(): String {
+        val build = io.clei.deviceinfo.Build(
+                Build.DEVICE,
+                Build.DISPLAY,
+                Build.HARDWARE,
+                Build.HOST,
+                Build.ID,
+                Build.TYPE,
+                Build.USER,
+                Build.UNKNOWN,
+                Version(
+                        Build.VERSION.RELEASE,
+                        Build.VERSION.SDK,
+                        Build.VERSION.SDK_INT,
+                        Build.VERSION.CODENAME
+                )
+        )
+        return Gson().toJson(build)
+    }
+
     companion object {
 
         /**
@@ -152,3 +176,22 @@ class DeviceinfoPlugin(private val registrar: Registrar) : MethodCallHandler {
         }
     }
 }
+
+data class Build(
+        val device:String,
+        val display: String,
+        val hardware: String,
+        val host: String,
+        val id: String,
+        val type:String,
+        val user: String,
+        val unknow:String,
+        val version:Version
+)
+
+data class Version(
+        val release: String,
+        val sdk: String,
+        val sdkInt: Int,
+        val codeName: String
+)

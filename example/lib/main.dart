@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:deviceinfo/deviceinfo.dart';
 import 'package:deviceinfo/screeninfo.dart';
+import 'package:deviceinfo/buildinfo.dart';
 
 void main() => runApp(new MyApp());
 
@@ -19,6 +22,7 @@ class _MyAppState extends State<MyApp> {
   String _imei = 'Unknown';
   String _deviceId = '';
   ScreenDisplay _screenDisplay;
+  Build _buildInfo;
 
   @override
   void initState() {
@@ -35,6 +39,7 @@ class _MyAppState extends State<MyApp> {
     String imei;
     String deviceId;
     ScreenDisplay screenDisplay;
+    Build buildInfo;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       appVersionName = await Deviceinfo.appVersionName;
@@ -43,6 +48,7 @@ class _MyAppState extends State<MyApp> {
       imei = await Deviceinfo.imei;
       deviceId = await Deviceinfo.deviceId;
       screenDisplay = await Deviceinfo.screenInfo;
+      buildInfo = await Deviceinfo.buildInfo;
     } on PlatformException {
       appVersionName = 'Failed to get app version name.';
       deviceVersionCode = -2;
@@ -50,6 +56,7 @@ class _MyAppState extends State<MyApp> {
       imei = 'Failed to get app imei';
       deviceId = 'Failed to get app deviceId';
       screenDisplay = null;
+      buildInfo = null;
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -64,6 +71,7 @@ class _MyAppState extends State<MyApp> {
       _imei = imei;
       _deviceId = deviceId;
       _screenDisplay = screenDisplay;
+      _buildInfo = buildInfo;
     });
   }
 
@@ -93,7 +101,12 @@ class _MyAppState extends State<MyApp> {
                 child: Text('app deviceId: $_deviceId'),
               ),
               Expanded(
-                child: Text('device screen display, width: ${_screenDisplay.width};  height: ${_screenDisplay.height}'),
+                child: Text(
+                    'device screen display, width: ${_screenDisplay == null ? 0 : _screenDisplay.width};  height: ${_screenDisplay == null ? 0 : _screenDisplay.height}'
+                )
+              ),
+              Expanded(
+                child: Text('device build info: ${_buildInfo == null ? "build info is null" : json.encode(_buildInfo)}'),
               )
             ],
           )
