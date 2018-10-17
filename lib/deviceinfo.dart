@@ -40,7 +40,7 @@ class Deviceinfo {
   }
 
   static Future<Build> get buildInfo async {
-    final String buildInfo = await _channel.invokeMethod('get_build');
+    final String buildInfo = await _channel.invokeMethod('getBuild');
     return Build.fromJson(json.decode(buildInfo));
   }
 

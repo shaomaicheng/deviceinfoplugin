@@ -25,7 +25,7 @@ private val GET_DEVICE_SCREEN = "getdevicescreen"
 
 private val DEVICE_INFO_SP_KEY = "device_info_sp_key"
 private val UUID_SP_KEY = "device_spkey_uuid"
-private val GET_BUILD = "get_build"
+private val GET_BUILD = "getBuild"
 
 /**
  * DeviceinfoPlugin
