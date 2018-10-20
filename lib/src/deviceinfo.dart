@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:deinfo/src/buildinfo.dart';
+import 'package:deinfo/src/screeninfo.dart';
 import 'package:flutter/services.dart';
-import 'package:deviceinfo/src/buildinfo.dart';
-import 'package:deviceinfo/src/screeninfo.dart';
 import 'dart:convert';
 
 class Deviceinfo {

@@ -1,12 +1,10 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:deinfo/src/buildinfo.dart';
+import 'package:deinfo/src/deviceinfo.dart';
+import 'package:deinfo/src/screeninfo.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:deviceinfo/src/deviceinfo.dart';
-import 'package:deviceinfo/src/screeninfo.dart';
-import 'package:deviceinfo/src/buildinfo.dart';
 
 void main() => runApp(new MyApp());
 
