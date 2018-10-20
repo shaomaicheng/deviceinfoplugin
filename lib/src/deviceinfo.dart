@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'buildinfo.dart';
-import 'screeninfo.dart';
+import 'package:deviceinfo/src/buildinfo.dart';
+import 'package:deviceinfo/src/screeninfo.dart';
 import 'dart:convert';
 
 class Deviceinfo {
@@ -29,7 +29,7 @@ class Deviceinfo {
     return imei;
   }
   
-  static Future<String> get deviceId async {
+  static Future<String> get uuid async {
     final String deviceId = await _channel.invokeMethod('getUUID');
     return deviceId;
   }
@@ -42,6 +42,11 @@ class Deviceinfo {
   static Future<Build> get buildInfo async {
     final String buildInfo = await _channel.invokeMethod('getBuild');
     return Build.fromJson(json.decode(buildInfo));
+  }
+
+  static Future<String> get deviceToken async {
+    final String deviceToken = await _channel.invokeMethod('getDeviceToken');
+    return deviceToken;
   }
 
 }

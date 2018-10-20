@@ -3,7 +3,10 @@ package io.clei.deviceinfo
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.wifi.WifiManager
 import android.os.Build
+import android.provider.Settings
+import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.telephony.TelephonyManager
 import android.text.TextUtils
@@ -22,10 +25,13 @@ private val DEVICE_VERSION_CODE = "getDeviceVersionCode"
 private val IMEI = "getImei"
 private val GET_UUID = "getUUID"
 private val GET_DEVICE_SCREEN = "getdevicescreen"
-
-private val DEVICE_INFO_SP_KEY = "device_info_sp_key"
-private val UUID_SP_KEY = "device_spkey_uuid"
 private val GET_BUILD = "getBuild"
+private val DEVICE_TOKEN = "getDeviceToken"
+
+
+private val DEVICE_INFO_SP = "device_info_sp"
+private val UUID_SP_KEY = "device_spkey_uuid"
+private val DEVICE_TOKEN_KEY = "device_token_key"
 
 /**
  * DeviceinfoPlugin
@@ -70,13 +76,15 @@ class DeviceinfoPlugin(private val registrar: Registrar) : MethodCallHandler {
             // 习题版本
             call.method == DEVICE_VERSION_CODE -> result.success(deviceVersion())
             // imei号
-            call.method == IMEI -> result.success(imei())
+            call.method == IMEI -> result.success(getImei(registrar.context()))
             // uuid
             call.method == GET_UUID -> result.success(deviceId(registrar.context()))
             // 屏幕宽高
             call.method == GET_DEVICE_SCREEN -> result.success(getDeviceScreen())
             // 获取build信息
             call.method == GET_BUILD -> result.success(getBuild())
+            // deviceToken
+            call.method == DEVICE_TOKEN -> result.success(getDeviceToken(registrar.context()))
             else -> result.notImplemented()
         }
     }
@@ -102,42 +110,15 @@ class DeviceinfoPlugin(private val registrar: Registrar) : MethodCallHandler {
     }
 
     /**
-     * 获取手机 imei值
-     * 需要申请权限
-     */
-    private fun imei(): String {
-        val context = registrar.context()
-        if (Build.VERSION.SDK_INT >= 23) {
-            val checkPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE)
-            return if (checkPermission != PackageManager.PERMISSION_GRANTED) {
-                "this phone don't have READ_PHONE_STATE permission"
-            } else {
-                imei(context)
-            }
-        } else {
-            return imei(context)
-        }
-    }
-
-    /**
-     * 获取 imei
-     *
-     */
-    private fun imei(context: Context): String {
-        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        return telephonyManager.deviceId
-    }
-
-    /**
      * 获取deviceid 实际为uuid值
      */
     private fun deviceId(context: Context): String {
-        val sharedPreferences = context.getSharedPreferences(DEVICE_INFO_SP_KEY, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(DEVICE_INFO_SP, Context.MODE_PRIVATE)
         var uuid = sharedPreferences.getString(UUID_SP_KEY, "")
         if (TextUtils.isEmpty(uuid)) {
             // 本地不存在，生成一个
             uuid = UUID.randomUUID().toString()
-            val editor = context.getSharedPreferences(DEVICE_INFO_SP_KEY, Context.MODE_PRIVATE).edit()
+            val editor = context.getSharedPreferences(DEVICE_INFO_SP, Context.MODE_PRIVATE).edit()
             editor.putString(UUID_SP_KEY, uuid)
             editor.apply()
         }
@@ -162,6 +143,114 @@ class DeviceinfoPlugin(private val registrar: Registrar) : MethodCallHandler {
                 )
         )
         return Gson().toJson(build)
+    }
+
+
+    private fun getDeviceToken(context: Context): String {
+        var deviceToken = context.getSharedPreferences(DEVICE_INFO_SP, Context.MODE_PRIVATE)
+                .getString(DEVICE_TOKEN_KEY, null)
+        if (TextUtils.isEmpty(deviceToken)) {
+            val androidId = getAndroidId(context)
+            val imei = getImei(context)
+            val imsi = getImsi(context)
+
+            var firstId = ""
+            var secondId = ""
+            if (!TextUtils.isEmpty(androidId)) {
+                firstId = androidId
+            } else if (!TextUtils.isEmpty(imsi)) {
+                firstId = imsi
+            }
+
+            var fullId = ""
+
+            if (!TextUtils.isEmpty(imei)) {
+                secondId = imei
+            } else if (!TextUtils.isEmpty(androidId)) {
+                fullId = getWifiMacAddress(context)
+                if (!TextUtils.isEmpty(fullId)) {
+                    secondId = fullId
+                }
+            }
+
+            var uuid = ""
+
+            if (!TextUtils.isEmpty(firstId) || !TextUtils.isEmpty(secondId)) {
+                fullId = firstId + secondId
+
+
+                try {
+
+                    uuid = UUID.nameUUIDFromBytes((fullId as java.lang.String).getBytes("utf8")).toString()
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            if (TextUtils.isEmpty(uuid)) {
+                uuid = UUID.randomUUID().toString()
+            }
+
+            context.getSharedPreferences(DEVICE_INFO_SP, Context.MODE_PRIVATE)
+                    .edit()
+                    .putString(DEVICE_TOKEN_KEY, uuid)
+                    .apply()
+
+            return uuid
+        } else {
+            return deviceToken
+        }
+    }
+
+    private fun getAndroidId(context: Context):String {
+        try {
+            val androidId = Settings.Secure.getString(context.contentResolver, "android_id")
+            if ("9774d56d682e549c" != androidId) {
+                return androidId
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
+    private fun getImei(context: Context) :String {
+        try {
+            val tm = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            if (ActivityCompat.checkSelfPermission(context, "android.permission.READ_PHONE_STATE") != 0) {
+                return ""
+            }
+            var deviceId = tm.deviceId
+            if ("000000000000000" != deviceId) {
+                return deviceId
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
+    private fun getImsi(context: Context) : String {
+        try {
+            val tm =context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            return if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.READ_PHONE_STATE) != 0)
+                "" else tm.subscriberId ?: ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
+    }
+
+    private fun getWifiMacAddress(context: Context):String {
+        try {
+            val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_WIFI_STATE) != 0)
+                "" else wifiManager.connectionInfo.macAddress ?: ""
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return ""
     }
 
     companion object {

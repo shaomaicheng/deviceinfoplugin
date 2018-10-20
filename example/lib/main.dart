@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:deviceinfo/deviceinfo.dart';
-import 'package:deviceinfo/screeninfo.dart';
-import 'package:deviceinfo/buildinfo.dart';
+import 'package:deviceinfo/src/deviceinfo.dart';
+import 'package:deviceinfo/src/screeninfo.dart';
+import 'package:deviceinfo/src/buildinfo.dart';
 
 void main() => runApp(new MyApp());
 
@@ -23,6 +23,7 @@ class _MyAppState extends State<MyApp> {
   String _deviceId = '';
   ScreenDisplay _screenDisplay;
   Build _buildInfo;
+  String _deviceToken;
 
   @override
   void initState() {
@@ -40,15 +41,17 @@ class _MyAppState extends State<MyApp> {
     String deviceId;
     ScreenDisplay screenDisplay;
     Build buildInfo;
+    String deviceToken;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       appVersionName = await Deviceinfo.appVersionName;
       deviceVersionCode = await Deviceinfo.deviceVersionCode;
       appVersionCode = await Deviceinfo.appVersionCode;
       imei = await Deviceinfo.imei;
-      deviceId = await Deviceinfo.deviceId;
+      deviceId = await Deviceinfo.uuid;
       screenDisplay = await Deviceinfo.screenInfo;
       buildInfo = await Deviceinfo.buildInfo;
+      deviceToken = await Deviceinfo.deviceToken;
     } on PlatformException {
       appVersionName = 'Failed to get app version name.';
       deviceVersionCode = -2;
@@ -57,6 +60,7 @@ class _MyAppState extends State<MyApp> {
       deviceId = 'Failed to get app deviceId';
       screenDisplay = null;
       buildInfo = null;
+      deviceToken = 'Failed to get device token';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -72,6 +76,7 @@ class _MyAppState extends State<MyApp> {
       _deviceId = deviceId;
       _screenDisplay = screenDisplay;
       _buildInfo = buildInfo;
+      _deviceToken = deviceToken;
     });
   }
 
@@ -106,7 +111,11 @@ class _MyAppState extends State<MyApp> {
                 )
               ),
               Expanded(
-                child: Text('device build info: ${_buildInfo == null ? "build info is null" : json.encode(_buildInfo)}'),
+//                child: Text('device build info: ${_buildInfo == null ? "build info is null" : json.encode(_buildInfo)}'),
+                child: Text('device build info:'),
+              ),
+              Expanded(
+                child: Text('device token: ${_deviceToken}'),
               )
             ],
           )

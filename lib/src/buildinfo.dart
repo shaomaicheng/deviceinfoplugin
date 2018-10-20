@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'buildinfo.g.dart';
+part 'package:deviceinfo/src/buildinfo.g.dart';
 
 @JsonSerializable()
 class Build {

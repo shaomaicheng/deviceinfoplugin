@@ -1,5 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
-part 'screeninfo.g.dart';
+part 'package:deviceinfo/src/screeninfo.g.dart';
 
 @JsonSerializable()
 class ScreenDisplay {
